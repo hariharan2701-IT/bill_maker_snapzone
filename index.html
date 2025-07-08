@@ -3,46 +3,199 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Snapzone Frames - Bill Generator</title>
+  <title>Snapzone Frames - Professional Invoice Generator</title>
   <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+  <div class="background-pattern"></div>
+  
   <div class="container">
-    <h1>📸 Snapzone Frames - Bill Generator</h1>
-    <form id="billForm">
-      <label>Order Number (#):</label>
-      <input type="text" id="orderNumber" required />
-      
-      <label>Customer Name:</label>
-      <input type="text" id="customerName" required />
+    <div class="header">
+      <div class="logo-section">
+        <div class="logo-icon">
+          <i class="fas fa-camera-retro"></i>
+        </div>
+        <div class="company-info">
+          <h1>Snapzone Frames</h1>
+          <p>Professional Photo Framing Services</p>
+        </div>
+      </div>
+      <div class="invoice-badge">
+        <i class="fas fa-file-invoice"></i>
+        <span>Invoice Generator</span>
+      </div>
+    </div>
 
-      <label>Phone Number:</label>
-      <input type="text" id="phone" required />
+    <form id="billForm" class="invoice-form">
+      <div class="form-section">
+        <h3><i class="fas fa-info-circle"></i> Order Information</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="orderNumber">
+              <i class="fas fa-hashtag"></i>
+              Order Number
+            </label>
+            <input type="text" id="orderNumber" placeholder="e.g., ORD-2024-001" required />
+          </div>
+          <div class="form-group">
+            <label for="orderDate">
+              <i class="fas fa-calendar"></i>
+              Order Date
+            </label>
+            <input type="date" id="orderDate" required />
+          </div>
+        </div>
+      </div>
 
-      <label>Within Coimbatore?</label>
-      <select id="coimbatore">
-        <option>Yes</option>
-        <option>No</option>
-      </select>
+      <div class="form-section">
+        <h3><i class="fas fa-user"></i> Customer Details</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="customerName">
+              <i class="fas fa-user-circle"></i>
+              Customer Name
+            </label>
+            <input type="text" id="customerName" placeholder="Enter full name" required />
+          </div>
+          <div class="form-group">
+            <label for="phone">
+              <i class="fas fa-phone"></i>
+              Phone Number
+            </label>
+            <input type="tel" id="phone" placeholder="+91 XXXXX XXXXX" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="email">
+            <i class="fas fa-envelope"></i>
+            Email Address (Optional)
+          </label>
+          <input type="email" id="email" placeholder="customer@example.com" />
+        </div>
+        <div class="form-group">
+          <label for="address">
+            <i class="fas fa-map-marker-alt"></i>
+            Complete Address
+          </label>
+          <textarea id="address" placeholder="Enter complete address with pincode" rows="3" required></textarea>
+        </div>
+      </div>
 
-      <label>Courier Required?</label>
-      <select id="courier">
-        <option>Yes</option>
-        <option>No</option>
-      </select>
+      <div class="form-section">
+        <h3><i class="fas fa-cog"></i> Service Details</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="coimbatore">
+              <i class="fas fa-map"></i>
+              Within Coimbatore?
+            </label>
+            <select id="coimbatore">
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="courier">
+              <i class="fas fa-shipping-fast"></i>
+              Courier Required?
+            </label>
+            <select id="courier" onchange="updateTotal()">
+              <option value="No">No</option>
+              <option value="Yes">Yes (+₹70)</option>
+            </select>
+          </div>
+        </div>
+      </div>
 
-      <label>Frame Size:</label>
-      <input type="text" id="frameSize" required />
+      <div class="form-section">
+        <h3><i class="fas fa-frame"></i> Frame Details</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="frameSize">
+              <i class="fas fa-expand-arrows-alt"></i>
+              Frame Size
+            </label>
+            <input type="text" id="frameSize" placeholder="e.g., 8x10, A4, 12x18" required />
+          </div>
+          <div class="form-group">
+            <label for="frameType">
+              <i class="fas fa-palette"></i>
+              Frame Type
+            </label>
+            <select id="frameType">
+              <option value="Standard">Standard Frame</option>
+              <option value="Premium">Premium Frame</option>
+              <option value="Luxury">Luxury Frame</option>
+              <option value="Custom">Custom Frame</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="frameAmount">
+              <i class="fas fa-rupee-sign"></i>
+              Frame Amount
+            </label>
+            <input type="number" id="frameAmount" placeholder="0" min="0" step="1" onchange="updateTotal()" required />
+          </div>
+          <div class="form-group">
+            <label for="quantity">
+              <i class="fas fa-sort-numeric-up"></i>
+              Quantity
+            </label>
+            <input type="number" id="quantity" value="1" min="1" onchange="updateTotal()" required />
+          </div>
+        </div>
+      </div>
 
-      <label>Frame Amount (₹):</label>
-      <input type="number" id="frameAmount" required />
+      <div class="form-section">
+        <h3><i class="fas fa-calculator"></i> Payment Summary</h3>
+        <div class="payment-summary">
+          <div class="summary-row">
+            <span>Subtotal:</span>
+            <span id="subtotal">₹0</span>
+          </div>
+          <div class="summary-row">
+            <span>Courier Charges:</span>
+            <span id="courierCharges">₹0</span>
+          </div>
+          <div class="summary-row total-row">
+            <span>Grand Total:</span>
+            <span id="grandTotal">₹0</span>
+          </div>
+        </div>
+      </div>
 
-      <label>Location:</label>
-      <input type="text" id="location" required />
-
-      <button type="button" onclick="generatePDF()">🧾 Download PDF Bill</button>
+      <div class="form-actions">
+        <button type="button" onclick="previewInvoice()" class="btn-secondary">
+          <i class="fas fa-eye"></i>
+          Preview Invoice
+        </button>
+        <button type="button" onclick="generatePDF()" class="btn-primary">
+          <i class="fas fa-download"></i>
+          Download PDF Invoice
+        </button>
+      </div>
     </form>
+  </div>
+
+  <!-- Preview Modal -->
+  <div id="previewModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Invoice Preview</h3>
+        <span class="close" onclick="closePreview()">&times;</span>
+      </div>
+      <div id="previewContent" class="modal-body">
+        <!-- Preview content will be inserted here -->
+      </div>
+      <div class="modal-footer">
+        <button onclick="closePreview()" class="btn-secondary">Close</button>
+        <button onclick="generatePDF()" class="btn-primary">Download PDF</button>
+      </div>
+    </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
