@@ -312,3 +312,4 @@ window.onclick = function(event) {
   if (event.target === modal) {
     closePreview();
   }
+}
