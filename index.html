@@ -236,6 +236,19 @@
         }
         
         e.target.value = formatted;
+        
+        // Format the number
+        let formatted = '';
+        if (digits.length > 0) {
+          formatted = '+91 ';
+          if (digits.length <= 5) {
+            formatted += digits;
+          } else {
+            formatted += digits.slice(0, 5) + ' ' + digits.slice(5);
+          }
+        }
+        
+        e.target.value = formatted;
       });
     };
 
