@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snapzone Frames - Bill Generator</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <h1>📸 Snapzone Frames - Bill Generator</h1>
+    <form id="billForm">
+      <label>Order Number (#):</label>
+      <input type="text" id="orderNumber" required />
+      
+      <label>Customer Name:</label>
+      <input type="text" id="customerName" required />
+
+      <label>Phone Number:</label>
+      <input type="text" id="phone" required />
+
+      <label>Within Coimbatore?</label>
+      <select id="coimbatore">
+        <option>Yes</option>
+        <option>No</option>
+      </select>
+
+      <label>Courier Required?</label>
+      <select id="courier">
+        <option>Yes</option>
+        <option>No</option>
+      </select>
+
+      <label>Frame Size:</label>
+      <input type="text" id="frameSize" required />
+
+      <label>Frame Amount (₹):</label>
+      <input type="number" id="frameAmount" required />
+
+      <label>Location:</label>
+      <input type="text" id="location" required />
+
+      <button type="button" onclick="generatePDF()">🧾 Download PDF Bill</button>
+    </form>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
