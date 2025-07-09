@@ -160,9 +160,18 @@ function closePreview() {
 function generatePDF() {
   if (!validateForm()) return;
   
-  // Check if jsPDF is loaded
-  if (typeof window.jspdf === 'undefined') {
-    alert('PDF library is loading... Please try again in a moment.');
+  // Ensure jsPDF is available
+  if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
+    // Try to load jsPDF if not available
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    script.onload = () => {
+      setTimeout(() => generatePDF(), 100);
+    };
+    script.onerror = () => {
+      alert('Failed to load PDF library. Please check your internet connection and try again.');
+    };
+    document.head.appendChild(script);
     return;
   }
   
