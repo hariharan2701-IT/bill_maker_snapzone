@@ -12,28 +12,60 @@ window.onload = () => {
 
   // Phone number formatting
   document.getElementById('phone').addEventListener('input', function(e) {
-    let input = e.target.value;
+    let value = e.target.value;
     
-    // Remove all non-digits
-    let digits = input.replace(/\D/g, '');
+    // Remove all non-digits except the + sign at the beginning
+    let cleanValue = value.replace(/[^\d+]/g, '');
     
-    // Limit to 10 digits (Indian mobile number)
-    if (digits.length > 10) {
-      digits = digits.slice(0, 10);
-    }
-    
-    // Format the number
-    let formatted = '';
-    if (digits.length > 0) {
-      formatted = '+91 ';
-      if (digits.length <= 5) {
-        formatted += digits;
-      } else {
-        formatted += digits.slice(0, 5) + ' ' + digits.slice(5);
+    // If user starts typing without +91, add it
+    if (cleanValue && !cleanValue.startsWith('+91')) {
+      // Extract only digits
+      let digits = cleanValue.replace(/\D/g, '');
+      
+      // If it starts with 91, don't add another 91
+      if (digits.startsWith('91') && digits.length > 2) {
+        digits = digits.substring(2);
       }
+      
+      // Limit to 10 digits for Indian mobile numbers
+      if (digits.length > 10) {
+        digits = digits.substring(0, 10);
+      }
+      
+      // Format as +91 XXXXX XXXXX
+      if (digits.length > 0) {
+        if (digits.length <= 5) {
+          cleanValue = '+91 ' + digits;
+        } else {
+          cleanValue = '+91 ' + digits.substring(0, 5) + ' ' + digits.substring(5);
+        }
+      } else {
+        cleanValue = '+91 ';
+      }
+    } else if (cleanValue.startsWith('+91')) {
+      // Extract digits after +91
+      let digits = cleanValue.substring(3).replace(/\D/g, '');
+      
+      // Limit to 10 digits
+      if (digits.length > 10) {
+        digits = digits.substring(0, 10);
+      }
+      
+      // Format as +91 XXXXX XXXXX
+      if (digits.length > 0) {
+        if (digits.length <= 5) {
+          cleanValue = '+91 ' + digits;
+        } else {
+          cleanValue = '+91 ' + digits.substring(0, 5) + ' ' + digits.substring(5);
+        }
+      } else {
+        cleanValue = '+91 ';
+      }
+    } else if (cleanValue === '') {
+      cleanValue = '';
     }
     
-    e.target.value = formatted;
+    e.target.value = cleanValue;
   });
 };
 
@@ -67,7 +99,7 @@ function validateForm() {
   
   // Validate phone number
   const phone = document.getElementById('phone').value;
-  if (phone && !phone.match(/^\+91\s\d{5}(\s\d{1,5})?$/)) {
+  if (phone && !phone.match(/^\+91\s\d{5}\s\d{5}$/)) {
     errors.push('Please enter a valid phone number');
     document.getElementById('phone').style.borderColor = '#ef4444';
   }
