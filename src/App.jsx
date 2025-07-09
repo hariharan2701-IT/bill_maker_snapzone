@@ -99,9 +99,9 @@ function App() {
 
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');
-      doc.text('Professional Photo Framing Services', 20, 28);
+      doc.text('Coimbatores Best Photo Framing Services', 20, 28);
       doc.text('Phone: +91 77085 54879 / +91 94836 92989', 20, 35);
-      doc.text('Email: info@snapzoneframes.com', 20, 42);
+      doc.text('Email: snapzoneframes@gmail.com', 20, 42);
 
       // Invoice details in header
       doc.setTextColor(255, 255, 255);
@@ -241,10 +241,12 @@ function App() {
       doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
       const terms = [
-        '• Payment is due within 30 days of invoice date',
-        '• All frames are custom made and non-returnable',
-        '• Delivery time: 7-10 working days for standard frames',
-        '• Customer is responsible for providing high-quality images'
+        '• Delivery Time: 1–3 working days for standard frame orders.',
+        '• Same-Day Delivery available across Tamil Nadu (based on location & time of order).',
+        '• All frames are custom-made and therefore non-returnable.',
+        '• Cash on Delivery is available only within Coimbatore.',
+       '• Please provide high-quality images to ensure the best print and framing results.',
+        '• For any queries, contact us at +91 77085 54879 or +91 94836 92989.'
       ];
 
       terms.forEach(term => {
@@ -264,7 +266,7 @@ function App() {
       doc.setTextColor(...textColor);
       doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
-      doc.text('We appreciate your business and look forward to serving you again.', 20, yPos);
+      doc.text('we’re grateful for your support and can’t wait to frame more memories for you', 20, yPos);
 
       // Add page border
       doc.setDrawColor(...lightGray);
