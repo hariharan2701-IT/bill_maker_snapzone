@@ -10,50 +10,30 @@ window.onload = () => {
   document.getElementById('quantity').addEventListener('input', updateTotal);
   document.getElementById('courier').addEventListener('change', updateTotal);
 
-  // Phone number formatting - start with empty field
+  // Simple phone number formatting - just 10 digits
   const phoneInput = document.getElementById('phone');
-  phoneInput.value = ''; // Clear the field initially
+  phoneInput.value = ''; // Start with empty field
   
   phoneInput.addEventListener('input', function(e) {
     let value = e.target.value;
     
-    // If field is empty, don't add +91 automatically
-    if (value === '') {
-      return;
-    }
-    
     // Remove all non-digits
     let digits = value.replace(/\D/g, '');
     
-    // If user starts typing digits, add +91 prefix
-    if (digits.length > 0) {
-      // Remove 91 if user typed it (to avoid +9191)
-      if (digits.startsWith('91') && digits.length > 2) {
-        digits = digits.substring(2);
-      }
-      
-      // Limit to 10 digits for Indian mobile numbers
-      if (digits.length > 10) {
-        digits = digits.substring(0, 10);
-      }
-      
-      // Format as +91 XXXXX XXXXX
-      let formatted = '+91 ';
-      if (digits.length <= 5) {
-        formatted += digits;
-      } else {
-        formatted += digits.substring(0, 5) + ' ' + digits.substring(5);
-      }
-      
-      e.target.value = formatted;
+    // Limit to 10 digits
+    if (digits.length > 10) {
+      digits = digits.substring(0, 10);
     }
-  });
-
-  // Handle backspace to allow clearing the field completely
-  phoneInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Backspace' && e.target.value === '+91 ') {
-      e.target.value = '';
+    
+    // Format as XXXXX XXXXX (5+5 format for better readability)
+    let formatted = '';
+    if (digits.length > 5) {
+      formatted = digits.substring(0, 5) + ' ' + digits.substring(5);
+    } else {
+      formatted = digits;
     }
+    
+    e.target.value = formatted;
   });
 };
 
@@ -85,9 +65,9 @@ function validateForm() {
     }
   });
   
-  // Validate phone number - must be exactly +91 XXXXX XXXXX format
-  const phone = document.getElementById('phone').value;
-  if (phone && !phone.match(/^\+91\s\d{5}\s\d{5}$/)) {
+  // Validate phone number - must be exactly 10 digits
+  const phone = document.getElementById('phone').value.replace(/\D/g, '');
+  if (phone && phone.length !== 10) {
     errors.push('Please enter a valid 10-digit phone number');
     document.getElementById('phone').style.borderColor = '#ef4444';
   }
@@ -108,11 +88,15 @@ function validateForm() {
 }
 
 function getFormData() {
+  // Format phone number for display (add +91 prefix for invoice)
+  const phoneDigits = document.getElementById('phone').value.replace(/\D/g, '');
+  const formattedPhone = phoneDigits ? `+91 ${phoneDigits.substring(0, 5)} ${phoneDigits.substring(5)}` : '';
+  
   return {
     orderNumber: document.getElementById('orderNumber').value,
     orderDate: document.getElementById('orderDate').value,
     customerName: document.getElementById('customerName').value,
-    phone: document.getElementById('phone').value,
+    phone: formattedPhone,
     email: document.getElementById('email').value,
     address: document.getElementById('address').value,
     coimbatore: document.getElementById('coimbatore').value,
