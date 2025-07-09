@@ -1,14 +1,13 @@
 import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
 export default defineConfig({
+  plugins: [react()],
   build: {
     rollupOptions: {
       input: {
         main: 'index.html'
-      },
-      external: ['https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js']
-    },
-    copyPublicDir: true
-  },
-  publicDir: 'public'
+      }
+    }
+  }
 })

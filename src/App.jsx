@@ -20,6 +20,7 @@ function App() {
 
   const [showPreview, setShowPreview] = useState(false);
   const [errors, setErrors] = useState({});
+  const [isGenerating, setIsGenerating] = useState(false);
 
   // Set today's date as default
   useEffect(() => {
@@ -71,213 +72,223 @@ function App() {
     }
   };
 
-  const generatePDF = () => {
+  const generatePDF = async () => {
     if (!validateForm()) return;
 
-    const { subtotal, courierCharge, grandTotal } = calculateTotals();
-    const doc = new jsPDF();
+    setIsGenerating(true);
 
-    // Set up colors
-    const primaryColor = [37, 99, 235];
-    const textColor = [30, 41, 59];
-    const lightGray = [148, 163, 184];
-    const darkGray = [75, 85, 99];
+    try {
+      const { subtotal, courierCharge, grandTotal } = calculateTotals();
+      const doc = new jsPDF();
 
-    // Header with company branding
-    doc.setFillColor(...primaryColor);
-    doc.rect(0, 0, 210, 45, 'F');
+      // Set up colors
+      const primaryColor = [37, 99, 235];
+      const textColor = [30, 41, 59];
+      const lightGray = [148, 163, 184];
+      const darkGray = [75, 85, 99];
 
-    // Company name and details in header
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(22);
-    doc.setFont('helvetica', 'bold');
-    doc.text('SNAPZONE FRAMES', 20, 20);
+      // Header with company branding
+      doc.setFillColor(...primaryColor);
+      doc.rect(0, 0, 210, 45, 'F');
 
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Professional Photo Framing Services', 20, 28);
-    doc.text('Phone: +91 77085 54879 / +91 94836 92989', 20, 35);
-    doc.text('Email: info@snapzoneframes.com', 20, 42);
+      // Company name and details in header
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(22);
+      doc.setFont('helvetica', 'bold');
+      doc.text('SNAPZONE FRAMES', 20, 20);
 
-    // Invoice details in header
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.text('INVOICE', 150, 20);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Professional Photo Framing Services', 20, 28);
+      doc.text('Phone: +91 77085 54879 / +91 94836 92989', 20, 35);
+      doc.text('Email: info@snapzoneframes.com', 20, 42);
 
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Invoice #: ${formData.orderNumber}`, 150, 30);
-    doc.text(`Date: ${new Date(formData.orderDate).toLocaleDateString('en-IN')}`, 150, 38);
+      // Invoice details in header
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('INVOICE', 150, 20);
 
-    // Reset text color for body
-    doc.setTextColor(...textColor);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Invoice #: ${formData.orderNumber}`, 150, 30);
+      doc.text(`Date: ${new Date(formData.orderDate).toLocaleDateString('en-IN')}`, 150, 38);
 
-    let yPos = 65;
+      // Reset text color for body
+      doc.setTextColor(...textColor);
 
-    // Bill To Section
-    doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...primaryColor);
-    doc.text('BILL TO:', 20, yPos);
+      let yPos = 65;
 
-    yPos += 8;
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...textColor);
+      // Bill To Section
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...primaryColor);
+      doc.text('BILL TO:', 20, yPos);
 
-    // Customer name in bold
-    doc.setFont('helvetica', 'bold');
-    doc.text(formData.customerName, 20, yPos);
-    yPos += 6;
-
-    doc.setFont('helvetica', 'normal');
-    if (formData.email) {
-      doc.text(formData.email, 20, yPos);
-      yPos += 6;
-    }
-
-    // Split address into multiple lines if too long
-    const addressLines = doc.splitTextToSize(formData.address, 80);
-    addressLines.forEach(line => {
-      doc.text(line, 20, yPos);
-      yPos += 6;
-    });
-
-    doc.text(`Location: ${formData.coimbatore === 'Yes' ? 'Within Coimbatore' : 'Outside Coimbatore'}`, 20, yPos);
-
-    yPos += 15;
-
-    // Service Details Table Header
-    doc.setFillColor(240, 240, 240);
-    doc.rect(20, yPos - 5, 170, 12, 'F');
-
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...primaryColor);
-    doc.text('SERVICE DETAILS', 25, yPos + 2);
-
-    yPos += 15;
-
-    // Table headers
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...darkGray);
-    doc.text('DESCRIPTION', 25, yPos);
-    doc.text('SIZE', 90, yPos);
-    doc.text('QTY', 120, yPos);
-    doc.text('UNIT PRICE', 140, yPos);
-    doc.text('AMOUNT', 170, yPos);
-
-    yPos += 8;
-
-    // Draw line under headers
-    doc.setDrawColor(...lightGray);
-    doc.setLineWidth(0.5);
-    doc.line(20, yPos - 2, 190, yPos - 2);
-
-    yPos += 5;
-
-    // Service details row
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...textColor);
-
-    doc.text(`${formData.frameType} Frame`, 25, yPos);
-    doc.text(formData.frameSize, 90, yPos);
-    doc.text(formData.quantity.toString(), 120, yPos);
-    doc.text(`₹${formData.frameAmount}`, 140, yPos);
-    doc.text(`₹${subtotal}`, 170, yPos);
-
-    yPos += 8;
-
-    // Courier service if applicable
-    if (formData.courier === 'Yes') {
-      doc.text('Courier Service', 25, yPos);
-      doc.text('-', 90, yPos);
-      doc.text('1', 120, yPos);
-      doc.text('₹70', 140, yPos);
-      doc.text('₹70', 170, yPos);
       yPos += 8;
-    }
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...textColor);
 
-    // Draw line above totals
-    doc.line(120, yPos, 190, yPos);
-    yPos += 8;
-
-    // Subtotal
-    doc.setFont('helvetica', 'normal');
-    doc.text('Subtotal:', 140, yPos);
-    doc.text(`₹${subtotal}`, 170, yPos);
-    yPos += 6;
-
-    // Courier charges
-    doc.text('Courier Charges:', 140, yPos);
-    doc.text(`₹${courierCharge}`, 170, yPos);
-    yPos += 8;
-
-    // Total with background
-    doc.setFillColor(...primaryColor);
-    doc.rect(120, yPos - 5, 70, 12, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.text('TOTAL:', 125, yPos + 2);
-    doc.text(`₹${grandTotal}`, 170, yPos + 2);
-
-    yPos += 20;
-
-    // Terms and conditions section
-    doc.setTextColor(...textColor);
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text('TERMS & CONDITIONS:', 20, yPos);
-
-    yPos += 8;
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    const terms = [
-      '• Payment is due within 30 days of invoice date',
-      '• All frames are custom made and non-returnable',
-      '• Delivery time: 7-10 working days for standard frames',
-      '• Customer is responsible for providing high-quality images'
-    ];
-
-    terms.forEach(term => {
-      doc.text(term, 20, yPos);
+      // Customer name in bold
+      doc.setFont('helvetica', 'bold');
+      doc.text(formData.customerName, 20, yPos);
       yPos += 6;
-    });
 
-    yPos += 8;
+      doc.setFont('helvetica', 'normal');
+      if (formData.email) {
+        doc.text(formData.email, 20, yPos);
+        yPos += 6;
+      }
 
-    // Footer
-    doc.setTextColor(...primaryColor);
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Thank you for choosing Snapzone Frames!', 20, yPos);
+      // Split address into multiple lines if too long
+      const addressLines = doc.splitTextToSize(formData.address, 80);
+      addressLines.forEach(line => {
+        doc.text(line, 20, yPos);
+        yPos += 6;
+      });
 
-    yPos += 6;
-    doc.setTextColor(...textColor);
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.text('We appreciate your business and look forward to serving you again.', 20, yPos);
+      doc.text(`Location: ${formData.coimbatore === 'Yes' ? 'Within Coimbatore' : 'Outside Coimbatore'}`, 20, yPos);
 
-    // Add page border
-    doc.setDrawColor(...lightGray);
-    doc.setLineWidth(1);
-    doc.rect(15, 50, 180, yPos - 40);
+      yPos += 15;
 
-    // Save the PDF
-    const fileName = `Snapzone_Invoice_${formData.orderNumber}_${formData.customerName.replace(/\s+/g, '_')}.pdf`;
-    doc.save(fileName);
+      // Service Details Table Header
+      doc.setFillColor(240, 240, 240);
+      doc.rect(20, yPos - 5, 170, 12, 'F');
 
-    // Close preview modal if open
-    setShowPreview(false);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...primaryColor);
+      doc.text('SERVICE DETAILS', 25, yPos + 2);
 
-    // Show success message
-    setTimeout(() => {
-      alert('✅ Invoice generated successfully!\n\nThe PDF has been downloaded to your device.');
-    }, 300);
+      yPos += 15;
+
+      // Table headers
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...darkGray);
+      doc.text('DESCRIPTION', 25, yPos);
+      doc.text('SIZE', 90, yPos);
+      doc.text('QTY', 120, yPos);
+      doc.text('UNIT PRICE', 140, yPos);
+      doc.text('AMOUNT', 170, yPos);
+
+      yPos += 8;
+
+      // Draw line under headers
+      doc.setDrawColor(...lightGray);
+      doc.setLineWidth(0.5);
+      doc.line(20, yPos - 2, 190, yPos - 2);
+
+      yPos += 5;
+
+      // Service details row
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...textColor);
+
+      doc.text(`${formData.frameType} Frame`, 25, yPos);
+      doc.text(formData.frameSize, 90, yPos);
+      doc.text(formData.quantity.toString(), 120, yPos);
+      doc.text(`₹${formData.frameAmount}`, 140, yPos);
+      doc.text(`₹${subtotal}`, 170, yPos);
+
+      yPos += 8;
+
+      // Courier service if applicable
+      if (formData.courier === 'Yes') {
+        doc.text('Courier Service', 25, yPos);
+        doc.text('-', 90, yPos);
+        doc.text('1', 120, yPos);
+        doc.text('₹70', 140, yPos);
+        doc.text('₹70', 170, yPos);
+        yPos += 8;
+      }
+
+      // Draw line above totals
+      doc.line(120, yPos, 190, yPos);
+      yPos += 8;
+
+      // Subtotal
+      doc.setFont('helvetica', 'normal');
+      doc.text('Subtotal:', 140, yPos);
+      doc.text(`₹${subtotal}`, 170, yPos);
+      yPos += 6;
+
+      // Courier charges
+      doc.text('Courier Charges:', 140, yPos);
+      doc.text(`₹${courierCharge}`, 170, yPos);
+      yPos += 8;
+
+      // Total with background
+      doc.setFillColor(...primaryColor);
+      doc.rect(120, yPos - 5, 70, 12, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('TOTAL:', 125, yPos + 2);
+      doc.text(`₹${grandTotal}`, 170, yPos + 2);
+
+      yPos += 20;
+
+      // Terms and conditions section
+      doc.setTextColor(...textColor);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text('TERMS & CONDITIONS:', 20, yPos);
+
+      yPos += 8;
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      const terms = [
+        '• Payment is due within 30 days of invoice date',
+        '• All frames are custom made and non-returnable',
+        '• Delivery time: 7-10 working days for standard frames',
+        '• Customer is responsible for providing high-quality images'
+      ];
+
+      terms.forEach(term => {
+        doc.text(term, 20, yPos);
+        yPos += 6;
+      });
+
+      yPos += 8;
+
+      // Footer
+      doc.setTextColor(...primaryColor);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Thank you for choosing Snapzone Frames!', 20, yPos);
+
+      yPos += 6;
+      doc.setTextColor(...textColor);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text('We appreciate your business and look forward to serving you again.', 20, yPos);
+
+      // Add page border
+      doc.setDrawColor(...lightGray);
+      doc.setLineWidth(1);
+      doc.rect(15, 50, 180, yPos - 40);
+
+      // Save the PDF
+      const fileName = `Snapzone_Invoice_${formData.orderNumber}_${formData.customerName.replace(/\s+/g, '_')}.pdf`;
+      doc.save(fileName);
+
+      // Close preview modal if open
+      setShowPreview(false);
+
+      // Show success message
+      setTimeout(() => {
+        alert('✅ Invoice generated successfully!\n\nThe PDF has been downloaded to your device.');
+      }, 300);
+
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      alert('❌ Error generating PDF. Please try again.');
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const { subtotal, courierCharge, grandTotal } = calculateTotals();
@@ -498,9 +509,23 @@ function App() {
               <Eye size={20} />
               Preview Invoice
             </button>
-            <button type="button" onClick={generatePDF} className="btn-primary">
-              <Download size={20} />
-              Download PDF Invoice
+            <button 
+              type="button" 
+              onClick={generatePDF} 
+              className="btn-primary"
+              disabled={isGenerating}
+            >
+              {isGenerating ? (
+                <>
+                  <div className="spinner"></div>
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Download size={20} />
+                  Download PDF Invoice
+                </>
+              )}
             </button>
           </div>
         </form>
@@ -551,7 +576,9 @@ function App() {
             </div>
             <div className="modal-footer">
               <button onClick={() => setShowPreview(false)} className="btn-secondary">Close</button>
-              <button onClick={generatePDF} className="btn-primary">Download PDF</button>
+              <button onClick={generatePDF} className="btn-primary" disabled={isGenerating}>
+                {isGenerating ? 'Generating...' : 'Download PDF'}
+              </button>
             </div>
           </div>
         </div>
