@@ -10,9 +10,8 @@ window.onload = () => {
   document.getElementById('quantity').addEventListener('input', updateTotal);
   document.getElementById('courier').addEventListener('change', updateTotal);
 
-  // Simple phone number formatting - just 10 digits
+  // Simple phone number formatting - just 10 digits with space after 5
   const phoneInput = document.getElementById('phone');
-  phoneInput.value = ''; // Start with empty field
   
   phoneInput.addEventListener('input', function(e) {
     let value = e.target.value;
@@ -58,7 +57,7 @@ function validateForm() {
   requiredFields.forEach(fieldId => {
     const field = document.getElementById(fieldId);
     if (!field.value.trim()) {
-      errors.push(`${field.previousElementSibling.textContent.replace('*', '')} is required`);
+      errors.push(`${field.previousElementSibling.textContent.replace(/[*:]/g, '').trim()} is required`);
       field.style.borderColor = '#ef4444';
     } else {
       field.style.borderColor = '#e2e8f0';
@@ -68,7 +67,7 @@ function validateForm() {
   // Validate phone number - must be exactly 10 digits
   const phone = document.getElementById('phone').value.replace(/\D/g, '');
   if (phone && phone.length !== 10) {
-    errors.push('Please enter a valid 10-digit phone number');
+    errors.push('Please enter a valid 10-digit mobile number');
     document.getElementById('phone').style.borderColor = '#ef4444';
   }
   
@@ -129,7 +128,7 @@ function previewInvoice() {
       <div class="preview-section">
         <h4>Customer Information</h4>
         <div class="preview-row"><span>Name:</span><span>${data.customerName}</span></div>
-        <div class="preview-row"><span>Phone:</span><span>${data.phone}</span></div>
+        <div class="preview-row"><span>Mobile:</span><span>${data.phone}</span></div>
         ${data.email ? `<div class="preview-row"><span>Email:</span><span>${data.email}</span></div>` : ''}
         <div class="preview-row"><span>Address:</span><span>${data.address}</span></div>
         <div class="preview-row"><span>Within Coimbatore:</span><span>${data.coimbatore}</span></div>
@@ -164,9 +163,24 @@ function closePreview() {
 function generatePDF() {
   if (!validateForm()) return;
   
+  // Show loading message
+  const originalText = event.target.innerHTML;
+  event.target.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+  event.target.disabled = true;
+  
+  // Function to reset button
+  function resetButton() {
+    event.target.innerHTML = originalText;
+    event.target.disabled = false;
+  }
+  
   // Function to actually generate the PDF
   function createPDF() {
     try {
+      if (!window.jspdf || !window.jspdf.jsPDF) {
+        throw new Error('jsPDF library not loaded');
+      }
+      
       const { jsPDF } = window.jspdf;
       const data = getFormData();
       const doc = new jsPDF();
@@ -371,32 +385,48 @@ function generatePDF() {
       // Close preview modal if open
       closePreview();
       
-      // Show success message
+      // Reset button and show success message
+      resetButton();
       setTimeout(() => {
         alert('✅ Invoice generated successfully!\n\nThe PDF has been downloaded to your device.');
-      }, 500);
+      }, 300);
       
     } catch (error) {
       console.error('PDF generation error:', error);
-      alert('❌ Error generating PDF. Please try again.');
+      resetButton();
+      alert('❌ Error generating PDF. Please try again or check your internet connection.');
     }
   }
   
   // Check if jsPDF is already loaded
   if (typeof window.jspdf !== 'undefined' && window.jspdf.jsPDF) {
-    createPDF();
+    setTimeout(createPDF, 100);
   } else {
-    // Load jsPDF dynamically
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-    script.onload = () => {
-      // Wait a moment for the library to initialize
-      setTimeout(createPDF, 200);
-    };
-    script.onerror = () => {
-      alert('❌ Failed to load PDF library. Please check your internet connection and try again.');
-    };
-    document.head.appendChild(script);
+    // Load jsPDF dynamically if not already loaded
+    const existingScript = document.querySelector('script[src*="jspdf"]');
+    if (existingScript) {
+      // Script exists but may not be loaded yet
+      setTimeout(() => {
+        if (window.jspdf && window.jspdf.jsPDF) {
+          createPDF();
+        } else {
+          resetButton();
+          alert('❌ PDF library is still loading. Please wait a moment and try again.');
+        }
+      }, 1000);
+    } else {
+      // Load the script
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      script.onload = () => {
+        setTimeout(createPDF, 300);
+      };
+      script.onerror = () => {
+        resetButton();
+        alert('❌ Failed to load PDF library. Please check your internet connection and try again.');
+      };
+      document.head.appendChild(script);
+    }
   }
 }
 
