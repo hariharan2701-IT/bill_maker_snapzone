@@ -42,7 +42,16 @@ function App() {
     const frameAmount = parseInt(formData.frameAmount) || 0;
     const quantity = parseInt(formData.quantity) || 1;
     const subtotal = frameAmount * quantity;
-    const courierCharge = formData.courier === 'Yes' ? 70 : 0;
+    
+    let courierCharge = 0;
+    if (formData.courier.includes('Yes')) {
+      if (formData.courier.includes('₹70')) courierCharge = 70;
+      else if (formData.courier.includes('₹140')) courierCharge = 140;
+      else if (formData.courier.includes('₹210')) courierCharge = 210;
+      else if (formData.courier.includes('₹280')) courierCharge = 280;
+      else if (formData.courier.includes('₹350')) courierCharge = 350;
+    }
+    
     const grandTotal = subtotal + courierCharge;
     
     return { subtotal, courierCharge, grandTotal };
@@ -196,12 +205,12 @@ function App() {
       yPos += 8;
 
       // Courier service if applicable
-      if (formData.courier === 'Yes') {
+      if (formData.courier.includes('Yes')) {
         doc.text('Courier Service', 25, yPos);
         doc.text('-', 90, yPos);
         doc.text('1', 120, yPos);
-        doc.text('₹70', 140, yPos);
-        doc.text('₹70', 170, yPos);
+        doc.text(`₹${courierCharge}`, 140, yPos);
+        doc.text(`₹${courierCharge}`, 170, yPos);
         yPos += 8;
       }
 
@@ -418,7 +427,11 @@ function App() {
                   onChange={handleInputChange}
                 >
                   <option value="No">No</option>
-                  <option value="Yes">Yes (+₹70)</option>
+                  <option value="Yes (+₹70)">Yes (+₹70) - 1kg parcel</option>
+                  <option value="Yes (+₹140)">Yes (+₹140) - 2kg parcel</option>
+                  <option value="Yes (+₹210)">Yes (+₹210) - 3kg parcel</option>
+                  <option value="Yes (+₹280)">Yes (+₹280) - 4kg parcel</option>
+                  <option value="Yes (+₹350)">Yes (+₹350) - 5kg parcel</option>
                 </select>
               </div>
             </div>
